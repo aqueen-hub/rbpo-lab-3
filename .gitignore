@@ -1,0 +1,22 @@
+# Compiled files
+target/
+*.class
+
+# IDE files
+.idea/
+*.iml
+*.iws
+*.ipr
+.settings/
+.classpath
+.project
+
+# Logs
+logs/
+*.log
+
+# Maven wrapper (можно оставить, но обычно не добавляют)
+# .mvn/
+
+# Other
+.DS_Store
