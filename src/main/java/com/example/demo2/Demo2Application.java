@@ -6,9 +6,11 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @SpringBootApplication
 public class Demo2Application {
@@ -22,13 +24,15 @@ public class Demo2Application {
 									  TrainerRepository trainerRepository,
 									  SubscriptionRepository subscriptionRepository,
 									  LessonRepository lessonRepository,
-									  BookingRepository bookingRepository) {
+									  BookingRepository bookingRepository,
+									  UserRepository userRepository,
+									  PasswordEncoder passwordEncoder) {
 		return args -> {
-			// Проверим, есть ли уже данные
+			// 1. Проверяем, есть ли уже данные в таблицах фитнес-клуба (если нет, добавляем)
 			if (memberRepository.count() == 0) {
 				// Создаём участников
 				Member member1 = new Member("Иван Петров", "ivan@example.com", "+71234567890", LocalDate.now());
-				Member member2 = new Member("Мария Сидорова", "maria@example.com", "+79876543210", LocalDate.now().minusDays(5));
+				Member member2 = new Member("Мария Сидорова", "maria@example.com", "+79876543210", LocalDate.now());
 				memberRepository.save(member1);
 				memberRepository.save(member2);
 
@@ -60,7 +64,27 @@ public class Demo2Application {
 				bookingRepository.save(booking1);
 				bookingRepository.save(booking2);
 
-				System.out.println("Тестовые данные добавлены");
+				System.out.println("Тестовые данные фитнес-клуба добавлены");
+			}
+
+			// 2. Создаём пользователя-админа, если его нет в базе
+			if (userRepository.findByUsername("admin").isEmpty()) {
+				User admin = new User();
+				admin.setUsername("admin");
+				admin.setPassword(passwordEncoder.encode("admin123"));
+				admin.setRoles(List.of("ADMIN"));
+				userRepository.save(admin);
+				System.out.println("Администратор создан: admin");
+			}
+
+			// 3. Создаём обычного пользователя, если его нет
+			if (userRepository.findByUsername("user").isEmpty()) {
+				User user = new User();
+				user.setUsername("user");
+				user.setPassword(passwordEncoder.encode("user123"));
+				user.setRoles(List.of("USER"));
+				userRepository.save(user);
+				System.out.println("Обычный пользователь создан: user");
 			}
 		};
 	}
